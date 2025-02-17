@@ -11,8 +11,6 @@ use Throwable;
 
 final class HttpException extends RuntimeException implements Throwable
 {
-
-    public const VALIDATION_EXCEPTION_MESSAGE = 'Validation exception.';
     public const TOO_MANY_REQUESTS_EXCEPTION_MESSAGE = 'Too many requests.';
     public const FORBIDDEN_EXCEPTION_MESSAGE = 'Forbidden.';
 
@@ -69,7 +67,7 @@ final class HttpException extends RuntimeException implements Throwable
      */
     public static function validationError(ResponseInterface $response): HttpException
     {
-        return new self(self::VALIDATION_EXCEPTION_MESSAGE . ': ' . self::parseAsStringMessage($response), 422);
+        return new self(self::parseAsStringMessage($response), 422);
     }
 
     /**
