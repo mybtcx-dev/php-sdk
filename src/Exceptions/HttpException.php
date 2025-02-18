@@ -33,11 +33,8 @@ final class HttpException extends RuntimeException implements Throwable
         $decoded = json_decode($contents, true);
 
         try {
-            if (isset($decoded['errors'])) {
-                if (isset($decoded['errors']['title'])
-                    && isset($decoded['errors']['code'])) {
-                    return $decoded['errors']['title'] . ' (Code: ' . $decoded['errors']['code'] . ')';
-                }
+            if (!empty($decoded['errors']['title']) && !empty($decoded['errors']['code'])) {
+                return $decoded['errors']['title'] . ' (Code: ' . $decoded['errors']['code'] . ')';
             }
         } catch (Throwable $e) {
             throw new HttpException('An unexpected error occurred', 500);
@@ -67,20 +64,20 @@ final class HttpException extends RuntimeException implements Throwable
      */
     public static function validationError(ResponseInterface $response): HttpException
     {
-        return new self(self::parseAsStringMessage($response), 422);
+        return new self(self::parseResponseAsJson($response), 422);
     }
 
     /**
      * @param ResponseInterface $response
      * @return string
      */
-    private static function parseAsStringMessage(ResponseInterface $response): string
+    private static function parseResponseAsJson(ResponseInterface $response): string
     {
         $contents = $response->getBody()->getContents();
         $decoded = json_decode($contents, true);
-        return array_key_exists('errors', $decoded) && array_key_exists('detail', $decoded['errors'])
-            ? implode(', ', array_values($decoded['errors']['detail']))
-            : $contents;
+        return json_encode(array_key_exists('errors', $decoded)
+            ? $decoded['errors']
+            : $contents);
     }
 
     /**
